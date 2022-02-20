@@ -1,10 +1,46 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
+import React, { useState } from 'react';
+import { useQuery } from 'react-query';
 
 import styles from '../../styles/Home.module.css';
 
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
+
 const Home: NextPage = () => {
+  const [keyword, setKeyword] = useState('');
+
+  const {
+    isLoading, data, refetch,
+  } = useQuery(['newsList', keyword], async () => {
+    const URL = `https://newsapi.org/v2/everything?q=${keyword}&pageSize=9&page=1&apiKey=${API_KEY}`;
+
+    const response = await fetch(URL);
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    return response.json();
+  }, {
+    refetchOnWindowFocus: false,
+    enabled: false,
+  });
+
+  if (isLoading) {
+    return (
+      <p>Loading...</p>
+    );
+  }
+
+  const handleOnEnterSearchNews = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter') {
+      return;
+    }
+    refetch();
+  };
+
   return (
     <div className={styles.container}>
       <Head>
@@ -27,37 +63,34 @@ const Home: NextPage = () => {
         </p>
 
         <div>
-          <input className={styles.search} type="text" placeholder="Search" />
+          <input
+            type="text"
+            placeholder="Search"
+            className={styles.search}
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onKeyPress={handleOnEnterSearchNews}
+          />
         </div>
 
         <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+          {data && data.articles && data.articles.map((article: {
+            publishedAt: string,
+            title: string,
+            description: string,
+            url: string,
+          }) => (
+            <React.Fragment key={article.publishedAt}>
+              <a href={article.url} className={styles.card}>
+                <h2>
+                  {article.title}
+                  {' '}
+                  &rarr;
+                </h2>
+                <p>{article.description}</p>
+              </a>
+            </React.Fragment>
+          ))}
         </div>
       </main>
 
