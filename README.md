@@ -6,3 +6,4 @@
 ## list
 
 - [with-nextjs-react-query](https://github.com/DavidYang2149/news-practice/tree/main/example/with-nextjs-react-query-typescript)
+- [with-nextjs-RTK](https://github.com/DavidYang2149/news-practice/tree/main/example/with-nextjs-rtk-tyepscript)
