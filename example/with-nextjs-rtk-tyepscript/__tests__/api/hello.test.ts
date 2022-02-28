@@ -1,7 +1,7 @@
 import request from 'supertest';
 import http from 'http';
 
-import handler from 'src/pages/api/hello';
+import handler from '../../src/pages/api/hello';
 
 import requestListener from './utils';
 
